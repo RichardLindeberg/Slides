@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>reveal.js</title>
+
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/black.css">
+
+	<!-- Theme used for syntax highlighting of code -->
+	<link rel="stylesheet" href="lib/css/zenburn.css">
+
+	<!-- Printing and PDF exports -->
+	<script>
+		var link = document.createElement('link');
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+		document.getElementsByTagName('head')[0].appendChild(link);
+	</script>
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section>
+				<h1>System design 2018</h1>
+			</section>
+			<section>
+				<h1>Important traits</h1>
+				<p>Simple development</p>
+				<p>Simple maintenance</p>
+				<p>Confidence</p>
+				<p>Correctnes</p>
+			</section>
+			<section>
+				<h2>Simple</h2>
+				<p>Dont always go for easy</p>
+			</section>
+			<section  id="fragments">
+				<p>Fallacies of distributed computing</p>
+				<ul>
+					<li class="fragment">The network is reliable.</li>
+					<li class="fragment">Latency is zero.</li>
+					<li class="fragment">Bandwidth is infinite.</li>
+					<li class="fragment">The network is secure.</li>
+					<li class="fragment">Topology doesn't change.</li>
+					<li class="fragment">There is one administrator.</li>
+					<li class="fragment">The network is homogeneous.</li>
+				</ul>
+			</section>
+			<section>
+				<h2>CAP</h2>
+				<p>Consistency - Availability - Partition tolerance</p>
+			</section>
+			<section>
+				<h2>ACID</h2>
+				<ul>
+					<li>Atomicity</li>
+					<li>Consistency</li>
+					<li>Isolation</li>
+					<li>Durability</li>
+				</ul>
+			</section>
+
+			<section>
+				<H1>Data modelleing</H1>
+				<p>Key value</p>
+				<p>Document</p>
+				<p>Event</p>
+				<p>Graph databases</p>
+				<p>Relational database (SQL)</p>
+
+			</section>
+			<section>
+				<h1>Key Value</h1>
+				<p>Simple</p>
+				<p>Fast</p>
+			</section>
+			<section>
+				<h1>Document</h1>
+				<p>Fast</p>
+				<p>Queryable</p>
+			</section>
+			<section>
+				<H1>Graph databases</H1>
+				<p>Relational in what most of us conceive as relational</p>
+			</section>
+			<section>
+				<h1>Relational database (SQL)</h1>
+				<p>Robust</p>
+				<p>Test of time</p>
+				<p>Fully ACID (if wanted)</p>
+			</section>
+			<section id="fragments">
+				<h2>Transactions</h2>
+				<p class="fragment">Pesimistic</p>
+				<p class="fragment">Optimistic</p>
+				<p class="fragment">TOCTTOU</p>
+				<p class="fragment">Scope of transaction</p>
+			</section>
+			<section>
+				<h1>Event</h1>
+				<p>Fast</p>
+				<p>"Easy" to distribute</p>
+				<p>No update</p>
+				<p>No delete</p>
+			</section>
+			<section>
+				<h2>Links</h2>
+				<small>
+					<a href="https://www.infoq.com/presentations/Simple-Made-Easy">Simple made easy</a>
+					<a href="https://www.red-gate.com/simple-talk/blogs/the-eight-fallacies-of-distributed-computing/">Fallacies of distributed computing</a>
+					<a href="http://www.julianbrowne.com/article/brewers-cap-theorem">CAP</a>
+					<a href="https://blogs.msdn.microsoft.com/marcelolr/2010/07/16/optimistic-and-pessimistic-concurrency-a-simple-explanation/">Concurrency models</a>
+					<a href="https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf">CQRS</a>
+				</small>
+
+			</section>
+		</div>
+	</div>
+
+	<script src="lib/js/head.min.js"></script>
+	<script src="js/reveal.js"></script>
+
+	<script>
+		// More info about config & dependencies:
+		// - https://github.com/hakimel/reveal.js#configuration
+		// - https://github.com/hakimel/reveal.js#dependencies
+		Reveal.initialize({
+			dependencies: [
+				{ src: 'plugin/markdown/marked.js' },
+				{ src: 'plugin/markdown/markdown.js' },
+				{ src: 'plugin/notes/notes.js', async: true },
+				{ src: 'plugin/highlight/highlight.js', async: true, callback: function () { hljs.initHighlightingOnLoad(); } }
+			]
+		});
+	</script>
+</body>
+
+</html>
