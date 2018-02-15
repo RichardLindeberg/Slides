@@ -30,7 +30,7 @@
 				<h1>System design 2018</h1>
 			</section>
 			<section>
-				<h1>Important traits</h1>
+				<h1>What we will cover today</h1>
 				<p>Simple development</p>
 				<p>Simple maintenance</p>
 				<p>Confidence</p>
@@ -65,42 +65,45 @@
 					<li>Durability</li>
 				</ul>
 			</section>
-
 			<section>
-				<H1>Data modelleing</H1>
-				<p>Key value</p>
-				<p>Document</p>
-				<p>Event</p>
-				<p>Graph databases</p>
-				<p>Relational database (SQL)</p>
-
+				<H1>Data store</H1>
 			</section>
 			<section>
-				<h1>Key Value</h1>
+				<h3>Key Value</h3>
 				<p>Simple</p>
 				<p>Fast</p>
-			</section>
-			<section>
-				<h1>Document</h1>
-				<p>Fast</p>
+				<h3>Document</h3>
 				<p>Queryable</p>
-			</section>
-			<section>
-				<H1>Graph databases</H1>
-				<p>Relational in what most of us conceive as relational</p>
+				<h3>Graph databases</h3>
+				<p>King of joins (actually no joins)</p>
 			</section>
 			<section>
 				<h1>Relational database (SQL)</h1>
 				<p>Robust</p>
 				<p>Test of time</p>
-				<p>Fully ACID (if wanted)</p>
+				<p>Easy</p>
+			</section>
+			<section>
 			</section>
 			<section id="fragments">
-				<h2>Transactions</h2>
-				<p class="fragment">Pesimistic</p>
-				<p class="fragment">Optimistic</p>
-				<p class="fragment">TOCTTOU</p>
-				<p class="fragment">Scope of transaction</p>
+				<h2>Is SQL Easy?</h2>
+				<p>Getting data in and out - ORM<br>EF 860 000 lines of code</p>
+				<p>Transactions</p>
+				<ul>
+					<li class="fragment">Database only</li>
+					<li class="fragment">Pesimistic</li>
+					<li class="fragment">Optimistic</li>
+					<li class="fragment">Scope of transaction</li>
+				</ul>
+			</section>
+			<section>
+				<h2>Audit?</h2>
+				<ul>
+					<li class="fragment">No history</li>
+					<li class="fragment">Log files</li>
+					<li class="fragment">Trigger -> History table</li>
+					<li class="fragment">CDC - Change Data Capture</li>
+				</ul>
 			</section>
 			<section>
 				<h1>Event</h1>
@@ -108,6 +111,34 @@
 				<p>"Easy" to distribute</p>
 				<p>No update</p>
 				<p>No delete</p>
+			</section>
+			<section>
+				<pre><code class="hljs" data-trim contenteditable>
+switch (personEvent)
+	{
+		case FirebaseTokenAdded evt: 
+			ApplyFirebaseTokenAdded(evt);
+			break;
+		case FailedToSendFirebaseMessage evt:
+			ApplyFailedToSendFirebaseMessage(evt);
+			break;
+		case SentFirebaseMessage evt:
+			ApplySentFirebaseMessage(evt);
+			break;
+	}
+				</code></pre>
+			</section>
+			<section>
+				<pre><code class="hljs" data-trim contenteditable>
+public void Apply(IFirebaseTokenRemoved evt)
+{
+	var ft = new FirebaseTokenAndNotificationTypeId(evt.FirebaseToken, evt.NotificationTypeId);
+	_firebaseTokenAndNotificationTypeIds.RemoveAll(t => t.Equals(ft));
+}
+				</code></pre>
+			</section>
+			<section>
+				<h3>Actor based systems</h3>
 			</section>
 			<section>
 				<h2>Links</h2>
