@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <title>WebUI testing</title>
+      <meta name="description" content="Using canopy?">
+      <meta name="author" content="Richard Lindeberg">
+      <meta name="apple-mobile-web-app-capable" content="yes">
+      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+      <link rel="stylesheet" href="css/reveal.css">
+      <link rel="stylesheet" href="css/theme/black.css" id="theme">
+      <!-- Theme used for syntax highlighting of code -->
+      <link rel="stylesheet" href="lib/css/zenburn.css">
+      <!-- Printing and PDF exports -->
+      <script>
+         var link = document.createElement('link');
+         link.rel = 'stylesheet';
+         link.type = 'text/css';
+         link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+         document.getElementsByTagName('head')[0].appendChild(link);
+      </script>
+      <!--[if lt IE 9]>
+      <script src="lib/js/html5shiv.js"></script>
+      <![endif]-->
+   </head>
+   <body>
+      <div class="reveal">
+         <!-- Any section element inside of this container is displayed as a slide -->
+         <div class="slides">
+            <section>
+               <h1>WebUI testing</h1>
+               <h3>In .Net</h3>
+            </section>
+            <section>
+               <ol>
+                  <li>Why</li>
+                  <li>What do we need</li>
+                  <li>Possibilities</li>
+                  <li>How</li>
+               </ol>
+            </section>
+            <section>
+               <h2>Why do we want to move over to .Net?</h2>
+               <ul>
+                  <li class="fragment">We have tooling for .Net</li>
+                  <li class="fragment">Web UI testing is the only thing we do in Java</li>
+                  <li class="fragment">All developers know c#</li>
+                  <li class="fragment">The current e2e is quite messy</li>
+               </ul>
+            </section>
+            <section>
+               <h2>What is our needs</h2>
+               <ul>
+                  <li class="fragment">Easy to get started</li>
+                  <li class="fragment">Easy to understand</li>
+                  <li class="fragment">Easy to extend/write new tests</li>
+                  <li class="fragment">Call our backend services</li>
+                  <li class="fragment">Be able to run on TeamCity</li>
+               </ul>
+            </section>
+            <section>
+               <section>
+                  <h2>Possibilities</h2>
+                  <ul>
+                     <li class="fragment">Selenium directly in C#</li>
+                     <li class="fragment">Coypu</li>
+                     <li class="fragment">Canopy</li>
+                     <li class="fragment">CodeUI</li>
+                     <li class="fragment">TestStack.Seleno</li>
+                  </ul>
+               </section>
+               <section>
+                  <h1>Selenium</h1>
+                  <p>Quite "low level". Its used by both Coypu and Canopy. using Selenium is quite verbose and there is a
+                     lot to think about when writing the tests. 
+                  </p>
+               </section>
+               <section>
+                  <h1>Coypu</h1>
+                  <p>I don't know it, Henrik does? :)</p>
+                  <pre><code  class="lang-fsharp">
+                        browser.Visit("http://mysite");
+                        browser.ClickButton("#TheButton");
+                        browser.FindId("MyInputBox").Text = "some text";
+                        browser.ClickButton(".anotherButton");
+                        Assert.AreEqual("You enetered: some text", browser.FindId(".resultBox").Text)
+                    </code></pre>
+               </section>
+               <section>
+                  <h1>Canopy</h1>
+                  <p>F# DSL language on top of selenium</p>
+                  <pre><code  class="lang-fsharp">
+url "http://mysite"
+click "#TheButton"
+"#MyInputBox" << "some text"
+click ".anotherButton"
+    ".resultBox" == "You entered: some text"
+                    </code></pre>
+               </section>
+               <section>
+                  <h1>CodeUI</h1>
+                  <p>Microsoft framework, I haven't seen much talk about it</p>
+               </section>
+               <section>
+                  <h1>TestStack.Seleno</h1>
+                  <p>I haven't yet tried it. Seems to run in the same process as the web an more for api/html testing then
+                     full ui testing?
+                  </p>
+               </section>
+            </section>
+            <section>
+               <h3>Define all css selectors / xPaths in a separate file</h3>
+               <pre><code  class="lang-fsharp">
+module MyPages
+
+let myPagesUrl = "/sv/my-pages"
+let invoiceHeaderPayButton = "invoice-header .column button"
+let invoiceDetailPayButton = "invoice-details .paylater"
+let WelcomePopup = "welcome-page"
+let DirectDebitWelcomePopup = "#direct-debit-welcome"
+let RegisterForDirectDebitButton = "#welcome-button"
+let closeWelcomPopupButton = ".close-reveal-modal"
+let invoice = "invoice"
+let invoiceDetails = "invoice-details"
+let ocr = ".ocr"
+let partPayButton = ".info-box-partpay"
+let postponeDueDate = ".postponeduedate"
+                    </code></pre>
+            </section>
+            <section>
+               <pre><code  class="lang-fsharp">
+let personWitoutMandate () =
+    context "Given PersonWithoutMandate When going to MyPages"
+    before (fun _ -> loginAs personalNumberWithoutMandate)
+
+    "Should show welcome popup" &amp;&amp;&amp; fun _->
+        displayed DirectDebitWelcomePopup
+        element DirectDebitWelcomePopup |> elementWithin RegisterForDirectDebitButton |> displayed
+
+    "Should close welcome popup" &amp;&amp;&amp; fun _->
+        displayed DirectDebitWelcomePopup
+        element DirectDebitWelcomePopup |> elementWithin closeWelcomPopupButton |> click
+        waitForElementToBeRemoved DirectDebitWelcomePopup 
+
+    "Should not show welcome popup twice" &amp;&amp;&amp; fun _->
+        displayed <| element DirectDebitWelcomePopup
+        element DirectDebitWelcomePopup |> elementWithin closeWelcomPopupButton |> click
+        waitForElementToBeRemoved DirectDebitWelcomePopup 
+        goTo myPagesUrl
+        waitForElementToBeRemoved DirectDebitWelcomePopup 
+                </code></pre>
+            </section>
+            <section>
+               <h3>Gotchas</h3>
+               <pre><code  class="lang-fsharp">
+context "Given PersonWithoutMandate When going to MyPages"
+before (fun _ -> loginAs personalNumberWithoutMandate)
+                    </code></pre>
+               <p>Context opens up a new test context.</p>
+               <p>Context = TestSuite in Selenium</p>
+               <p>Before is a function on a testsuite</p>
+            </section>
+            <section>
+               <pre><code  class="lang-fsharp">"Should show welcome popup" &amp;&amp;&amp; fun _-> ()</code></pre>
+               Is the same as
+               <pre><code  class="lang-fsharp">ntest "Should show welcome popup" (fun _-> () ) </code></pre>
+               The reason is that &amp;&amp;&amp;
+               is an operator.<br> Just like "+". 1 + 2 could be written add 1 2<br>
+               <small>
+                  <i>
+                     <p>To call a function in F# give the name of the function then the parameters.</p>
+                     <p>To call a function in C# you give the name of the funtion then paranthesis and separate each parameter by comma and then end paranthesis.</p>
+                     <p>Ohh so verbose. :)</p>
+               </small>
+               </i>
+            </section>
+            <section>
+               <pre><code  class="lang-fsharp">
+                   displayed MyPages.DirectDebitWelcomePopup
+                </pre>
+               </code>
+               <p>Checks that the DirectDebitWelcomePopup is shown. </p>
+               <p>Could of course be written as </p>
+               <pre><code  class="lang-fsharp">
+                   displayed "#direct-debit-welcome"
+                </pre>
+               </code>
+               But i think the first is more clear. MyPages could be made reduant as well if we open upp MyPages before. Just as we do in
+               C# with using
+            </section>
+            <section>
+               A little bit more complex check.
+               <pre><code  class="lang-fsharp">
+element DirectDebitWelcomePopup 
+|> elementWithin RegisterForDirectDebitButton 
+|> displayed
+                </pre>
+               </code>
+               Could be written as:
+               <pre><code  class="lang-fsharp">
+let popup = element DirectDebitWelcomePopup
+let registrationButton = elementWithin RegisterForDirectDebitButton popup 
+displayed registrationButton
+                </pre>
+               </code>
+            </section>
+            <section>
+               
+                  Writing small helper functions can be done like this.
+                  <pre><code  class="lang-fsharp">
+module Utils
+open canopy
+let baseUrl = "http://qliro2-development.dev-web.qliro.local";
+
+let goTo page = 
+    baseUrl + page |> url
+                </pre>
+                  </code>
+                  Then we can use them on other places like this
+                  <pre><code  class="lang-fsharp">
+open Utils
+goTo "/SomePage/Somewhere"
+                </pre>
+                  </code>
+                  Th same in c# would be simular to:
+                  <pre><code  class="lang-fsharp">
+Utils.goTo("/SomePage/Somewhere")
+                </pre>
+                  </code>
+               </section>
+            
+            <section>   
+               <section>
+                  <h3>Some shallow F# dive</h3>
+                  <p>Functions are first class values in f#</p>
+                  <p>That means that there is pretty much difference between a constant and a function
+                  <p>
+                  <p>You use the keyword "let" to assigne a value/function
+                  <ul>
+                     <li class="fragment">
+                        let one = 1<br>
+                        <i>val one : int = 1</i>
+                     </li>
+                     <li class="fragment">
+                        let two = 1 + 1<br>
+                        <i>val two : int = 2</i>
+                     </li>
+                     <li class="fragment">
+                        let addOne x = 1 + x<br>
+                        <i>val addOne : x:int -> int<br>
+                        This means that addOne takes one parameter of type int and will return an int
+                        </i>
+                     </li>
+                  </ul>
+               </section>
+               <section>
+                  <h3>Eager evaluation</h3>
+                  let add x y = x + y<br>
+                  <i>val add : x:int -> y:int -> int</i><br>
+                  <br> let two = add 1 1<br>
+                  <i>val two : int = 2</i><br>
+                  <br> let four = add two two<br>
+                  <i>val two : int = 4</i><br>
+               </section>
+               <section>
+                  <p>Thats fine but if you use something like this</p>
+                  <pre><code class="lang-fsharp">let printWorld = printfn "World"
+let printHello = printfn "Hello"
+
+printHello
+printWorld
+                </code></pre>
+                  <p>what you get is</p>
+                  <pre><code  class="lang-fsharp">
+World
+Hello
+
+val printWorld : unit = ()
+val printHello : unit = ()
+val it : unit = ()
+</code></pre>
+                  
+               </section>
+               <section>
+                  You would have to do like this<br>
+                  
+                        <pre><code class="lang-fsharp">
+let printWorld () = printfn "World"
+let printHello () = printfn "Hello"
+
+printHello ()
+printWorld ()
+                    </code></pre>
+                        what you get is
+                        <pre><code  class="lang-fsharp">
+Hello
+World
+
+val printWorld : unit -> unit
+val printHello : unit -> unit
+val it : unit = ()
+</code></pre>
+                  
+               </section>
+            </section>
+            <section>
+                <section>
+                <h3>Types in F#</h3>
+                <pre><code  class="lang-fsharp">
+open System
+type Person = {Firstname : string; Lastname : string; Birthdate : DateTime Option}
+
+let roffe = {Firstname = "Richard"; Lastname = "Lineberg"; Birthdate = Some (DateTime.Parse("1980-04-12")) }
+let poffe = {Firstname = "Richard"; Lastname = "Lineberg"; Birthdate = None}
+
+let printPerson p = 
+    printfn "Name: %s %s born on %A" p.Firstname p.Lastname p.Birthdate
+
+printPerson roffe
+printPerson poffe
+</code></pre>
+Would print: <br>
+Name: Richard Lineberg born on Some 1980-04-12 00:00:00
+Name: Richard Lineberg born on "null"
+                </section>
+                <section>
+                    <pre><code  class="lang-fsharp">
+let waitForElementToBeRemoved selector =
+        waitFor (fun _ -> 
+                match someElement selector with 
+                    | None -> true
+                    | Some _ -> false
+            )</code></pre>
+                </section>
+            </section>
+            <section>
+                <a href="http://lefthandedgoat.github.io/canopy/actions.html" target="_blank">http://lefthandedgoat.github.io/canopy/actions.html</a>
+            </section>
+         </div>
+      </div>
+      <script src="lib/js/head.min.js"></script>
+      <script src="js/reveal.js"></script>
+      <script>
+         // More info https://github.com/hakimel/reveal.js#configuration
+         Reveal.initialize({
+             history: true,
+         
+             // More info https://github.com/hakimel/reveal.js#dependencies
+             dependencies: [
+                 { src: 'plugin/markdown/marked.js' },
+                 { src: 'plugin/markdown/markdown.js' },
+                 { src: 'plugin/notes/notes.js', async: true },
+                 { src: 'plugin/highlight/highlight.js', async: true, callback: function () { hljs.initHighlightingOnLoad(); } }
+             ]
+         });
+      </script>
+   </body>
+</html>

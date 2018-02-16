@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Entity Framwrok short presentation</title>
+
+    <meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+    <meta name="author" content="Hakim El Hattab">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+
+<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+</head>
+
+<body>
+
+    <div class="reveal">
+
+        <!-- Any section element inside of this container is displayed as a slide -->
+        <div class="slides">
+            <section>
+                <h1>ORM Mapping</h1>
+                <h3>From the relational world to the world of objects</h3>
+            </section>
+            <section>
+                <ol>
+                    <li>Why</li>
+                    <li>What</li>
+                    <li>How</li>
+                </ol>
+            </section>
+            <section>
+                <h2>Why do we want and ORM mapper?</h2>
+                <ul>
+                    <li class="fragment">We need to perist information in case our system crashes or gets restated. And maybe we can't have it
+                        all in memory</li>
+                    <li class="fragment">We don't want to spend years mastering SQL</li>
+                    <li class="fragment">We want to be sure to keep the schema of the SQL server in sync with our code</li>
+                    <li class="fragment">We want intelisense when talking to the database!</li>
+                </ul>
+            </section>
+            <section>
+                <h2>What is an ORM mapper?</h2>
+                <p>The bridge between our nice C# OO world and the scary world of relational data.</p>
+                <p class="fragment">Meaning All the nitty itty bits of SQL will be in nice C# friendly objects and classes</p>
+                <p class="fragment">Is it slow?</p>
+                <p class="fragment">Of course, but so is C# compared to perfectly super tuned Assembly code</p>
+            </section>
+            <section>
+                <section>
+                <h3>Different ways of getting the model in</h3>
+                <p>Code first</p>
+                <p>Model first</p>
+                <p>SQL first</p>
+                </section>
+                <section>
+                    <p>Code first means that we create the models in c#<p>
+                    <ul>
+                        <li>We get update scripts for database migrations</li>
+                        <li>We can do special SQL parts in the migration</li>
+                        <li>Easy for simple use cases</li>
+                        <li>No need to learn a new designer</li>
+                    </ul>
+                </section>
+                <section>
+                    <p>Model first means that we have a designer in visual studio to create the model. </p>
+                    <img src="images/efModelFirst.png" />
+                </section>
+                    <section>
+                    <p>Sql first means that we use our DBA do design a perfect database</p>
+                    <ul>
+                        <li>Use this with complex databases</li>
+                        <li>No migration path for the SQL</li>
+                    </ul>
+                </section>
+            </section>
+            <section>
+                <h2>How do we use it? (Code first)</h2>
+                <ul>
+                    <li>Add reference to Entiy Framework</li>
+                    <li>Create a class</li>
+                    <li>Create a database context class</li>
+                    <li>Run some powershell script files</li>
+                    <li>Instantiate your db Context</li>
+                    <li>Now you can query your database just like any other IEnumerable</li>
+                </ul>
+            </section>
+            <section>
+                <p>Since we use code first we will use the Package Manager Console</p>
+                <p class="fragment">Every one should now how to open it! :)</p>
+            </section>
+            <section>
+                <div>In Package Manager console run <pre><code class="hlps" data-trim contenteditable>Install-Package EntityFramework</code></pre></div>
+                <div class="fragment">Or just install the package as you usually do..</p>
+            </section>
+            <section>
+                <div>Open web.config and add a new connectionString part
+                    <pre><code class="hlxml" data-trim contenteditable>
+  &lt;connectionStrings&gt;
+    &lt;add name="Notifications" connectionString="Persist Security Info=False;Integrated Security=SSPI;database=Notifications;server=localhost;MultipleActiveResultSets=True" providerName="System.Data.SqlClient" /&gt;
+  &lt;/connectionStrings&gt;
+					</code></pre>
+                </div>
+                <p>But maybe change the name, database and so on if you don't happend to be creating a system for Notifications.
+            </section>
+            <section>
+                <section>
+                <p>Create a new class that will be the SQL table data
+                    <p>
+                        <pre><code class="hlcs" data-trim contenteditable>
+public class Blog 
+{ 
+    public int BlogId { get; set; } 
+    public string Name { get; set; } 
+} 
+ 
+                    </code></pre>
+                        <div class="fragment">
+                            <p>There are a ton of <a href="http://www.entityframeworktutorial.net/code-first/dataannotation-in-code-first.aspx"
+                                    target="_blank">attributes</a> that we can use to customize the data. </p>
+                            <p>And some <a href="http://www.entityframeworktutorial.net/code-first/code-first-conventions.aspx"
+                                    target="_blank">conventions </a>that will autoconfigure stuff for us </p>
+                        </div>
+                        </section>
+                        <section>
+                           <pre><code data-trim contenteditable>
+ [Table("dat_PaymentRequest")]
+public class PaymentRequestDto
+{
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    
+    public int Id { get; set; }
+
+    [MaxLength(128)]
+    public string CorrelationId { get; set; }
+
+    [Key]
+    [MaxLength(50)]
+    public string TransactionId { get; set; }
+
+    [MaxLength(12)]
+    public string Ssn { get; set; }
+
+    [MaxLength(50)]
+    public string Ocr { get; set; }
+
+    [MaxLength(50)]
+    public string BillingDate { get; set; }
+
+    public int Currency { get; set; }
+
+    public decimal Amount { get; set; }
+
+    public DateTime CreationDateUtc { get; set; }
+
+    [Required, DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public DateTime LastUpdatedUtc { get; set; }
+
+    [MaxLength(50)]
+    public string ChannelId { get; set; }
+
+    public int State { get; set; }
+
+    public bool WrittenToArc { get; set; }
+
+    public bool EmailSent { get; set; }
+
+    public string ValidationErrors { get; set; }
+
+    public string PaymentGatewayErrorMessage { get; set; }
+
+    public int PaymentGatewayHttpError { get; set; }
+
+    [Timestamp]
+    public byte[] RowVersion { get; set; }
+}                               
+                            </code></pre>
+                        </section>
+                        <section>
+<pre><code data-trim contenteditable>
+public class Student
+{
+    public Student()
+    { 
+        
+    }
+    public int StudentID { get; set; }
+    public string StudentName { get; set; }
+    public DateTime DateOfBirth { get; set; }
+    public byte[]  Photo { get; set; }
+    public decimal Height { get; set; }
+    public float Weight { get; set; }
+        
+    public Teacher Teacher { get; set; }
+
+    public Standard Standard { get; set; }
+}
+
+public class Teacher
+{
+    public Teacher()
+    { 
+        
+    }
+    public int TeacherId { get; set; }
+    public string TeacherName { get; set; }
+}
+
+  </code></pre>
+                        </section>
+            </section>
+            <section>
+                <section>
+                <p>Create a database context</p>
+
+                <pre><code class="hljs" data-trim contenteditable>
+public class BloggingContext : DbContext 
+{ 
+    public DbSet&lt;Blog&gt; Blogs { get; set; } 
+}
+                       </code></pre>
+                </section>
+                <section>
+<pre><code class="hljs" data-trim contenteditable>
+ public class DirectDebitDbContext : DbContext
+    {
+        public DirectDebitDbContext() : base("DirectDebit")
+        {
+
+        }
+
+        public DbSet<PaymentRequestDto> PaymentRequests { get; set; }
+
+        public DbSet<PaymentRequestHistoryDto> PaymentRequestHistory { get; set; }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<PaymentRequestDto>().Property(p => p.RowVersion).IsConcurrencyToken();
+            modelBuilder.Entity<PaymentRequestDto>()
+                .Property(p => p.Id)
+                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
+
+            modelBuilder.Entity<PaymentRequestDto>()
+                .Property(p => p.LastUpdatedUtc)
+                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Computed);
+
+            modelBuilder.Entity<PaymentRequestDto>()
+                .Property(t => t.CorrelationId)
+                .HasColumnAnnotation(IndexAnnotation.AnnotationName,
+                    new IndexAnnotation(new IndexAttribute("IX_PaymentRequest_CorrelationId") {IsUnique = true}));
+
+            modelBuilder.Entity<PaymentRequestHistoryDto>()
+                .Property(p => p.HistoryId)
+                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
+
+            base.OnModelCreating(modelBuilder);
+        }
+    }
+        </code></pre>
+                </section>
+            </section>
+            <section>
+                <p>Goto package manager</p>
+                <pre><code class="hlps" data-trim contenteditable>
+                Enable-Migration
+                  </code></pre>
+                <p>To enable database migrations</p>
+                <div class="fragment">
+                    <p>Then create the first database migration</p>
+                    <pre><code class="hlps" data-trim contenteditable>
+                Add-Migration IntialDatabaseSetup
+                  </code></pre>
+                </div>
+                <div class="fragment">
+                    <p>Then create the database</p>
+                    <pre><code class="hlps" data-trim contenteditable>
+                Update-Database
+                  </code></pre>
+                </div>
+            </section>
+            <section>
+                    <p>Now we are ready to do some magic</p>
+                    <pre><code data-trim contenteditable>
+var db = new BloggingContext();
+var blogItem = db.Blogs.Where(t => t.BlogId == 1).ToList();
+                    </code></pre>
+                    <p>Important to use the ToList()</p>
+                    <p>Without that we send the query, not the result</p>
+            </section>            
+            <section>
+                <p>To add data you can do something like this</p>
+                    <pre><code data-trim contenteditable>
+var db = new BloggingContext();
+var newBlogPost = db.Blogs.Create();
+newBlogPost.Name = "The latest coolest blog";
+db.Blogs.Add(newBlogPost);
+db.SaveChanges();
+                    </code></pre>
+            </section>
+            <section>
+                <p>To update the blogpost</p>
+                <pre><code data-trim contenteditable>
+var db = new BloggingContext();
+var oldPost = db.Blogs.Single(t => t.Name == "The lastest coolest blog");
+oldPost.Name = "The coolest blog ever";
+db.SaveChanges();
+                    </code></pre>
+                <p>The db context keeps track of all changes</p>
+            </section>
+            <section>
+                <h1>Now you know it all!</h1>
+            </section>
+            </div>
+        </div>
+        <script src="lib/js/head.min.js"></script>
+        <script src="js/reveal.js"></script>
+
+        <script>
+        // More info https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize({
+            history: true,
+
+            // More info https://github.com/hakimel/reveal.js#dependencies
+            dependencies: [
+                { src: 'plugin/markdown/marked.js' },
+                { src: 'plugin/markdown/markdown.js' },
+                { src: 'plugin/notes/notes.js', async: true },
+                { src: 'plugin/highlight/highlight.js', async: true, callback: function () { hljs.initHighlightingOnLoad(); } }
+            ]
+        });
+    </script>
+</body>
+
+</html>

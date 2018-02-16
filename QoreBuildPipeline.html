@@ -1,0 +1,262 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>Qore build pipeline</section>
+				<section>
+					<p>Automate as much as possible</p>
+					<p>Let computers do what they do good,<br> let people do what they excell at</p>
+				</section>
+				<section>
+						<p>We will do more then 1 deployment</p>
+						<p>We want the deployment to be repeatable</p>
+						<p>We want the code to be our documentation</p>
+					</section>
+				<section>
+						<h2>Jira</h2>
+						<p>Standard Qliro flow</p>
+						<p>Looking into ways to automate release tickets</p>
+				</section>
+				<section>
+					<h2>GIT</h2>
+					<p>Standard GIT flow</p>
+				</section>
+				<section>
+					<section id="fragments">
+						<h2>TeamCity</h2>
+						<p>Only 2 configured steps in TeamCity</p>
+						<ul>
+							<li class="fragment">One step to download Fake</li>
+							<li class="fragment">One step to run our build script</li>
+						</ul>
+					</section>
+				</section>
+				<section>
+					<section id="fragments">
+						<h2>Why Fake?</h2>
+						<ul>
+							<li class="fragment">Set up in less then 15 minutes</li>
+							<li class="fragment">Ability to do local build the same way as TC</li>
+							<li class="fragment">Version management - stamp DLL/EXE files - the correct way</li>
+							<li class="fragment">Possibility to build multiple Nuget Packages in same solution</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Set up of Fake</h2>
+						<p>Copy the following from another solution</p>
+							<ul>
+								<li>Build.fsx</li>
+								<li>Build.Cmd</li>
+								<li>FakeGet.cmd</li>
+								<li>.Nuget folder</li>
+							</ul>
+					</section>
+					<section>
+						<p>Configure Fake by opening build.fsx</p>
+						<ul>
+								<li>Change Solutionname</li>
+								<li>Change tests pattern if you don't follow Qore standard</li>
+								<li>Change the Octopus package name</li>
+								<li>Change the nugets package list to mach your solution</li>
+								<li>If you must build with vs2015 tool chain change under build</li>
+								<li>If you must use nUnit 2.x change under tests</li>
+						</ul>
+					</section>
+					<section>
+						<p>Test the build by open a command prompt and run <i>FakeGet</i> and the <i>Build</i></li>
+					</section>
+					<section>
+						<h2>Set up TeamCity</h2>
+						<ul>
+							<li>Create new project</li>
+							<li>Add new vcs root</li>
+							<li>Add build step - execute command fakeget.cmd</li>
+							<li>Add build step
+								<ul>
+									<li>Execute command Build.cmd</li>
+									<li>Add Parameters XXXX</li>
+								</ul>
+							</li>
+						</ul>
+					</section>
+				</section>
+			</section>
+			<section>
+				<h2>Testing</h2>
+				<ul>
+						<ul>Testing should be automated</ul>
+						<ul>Manual testing can be used as Exploratory testing</ul>
+						<ul>Once issues are found the need to be Automated if demmed serious enough</ul>
+						<ul>Testing should be part of the build step</ul>
+				</ul>
+			</section>
+			<section>
+				<h2>Octopus</h2>
+				<p>Using "Qliro default" the standard project that was set up before I Joined</p>
+				<p>It is not easy to follow what happens but easy to set up</p>
+			</section>
+			<section>
+				<section>
+					<h2>Octopus handles all configuration</h2>
+					<p>Config in Qliro common is not configuration!</p>
+					<p>Use Web.config or App.Config (we have no .Net Core yet)</p>
+					<p>Use Web.release.config if needed to do more advanced transforms - but values must still be from octopus</p>
+				</section>
+				<section>
+					<p>Prefix app setting with App.</p>
+					<img src="images/octovariables.png">
+				</section>
+				<section>
+						<pre><code data-trim data-noescape>
+								&lt;system.serviceModel&gt;
+								&lt;behaviors&gt;
+								&lt;endpointBehaviors&gt;
+									&lt;behavior name="bankid" xdt:Transform="Replace"&gt;
+									&lt;clientCredentials&gt;
+										&lt;clientCertificate findValue="#{App.ClientCertificate}" storeLocation="LocalMachine" storeName="My" x509FindType="FindBySubjectName" /&gt;
+										&lt;serviceCertificate&gt;
+										&lt;defaultCertificate findValue="#{App.ServerCertificate}" storeLocation="LocalMachine" storeName="Root" x509FindType="FindBySubjectName" /&gt;
+										&lt;authentication certificateValidationMode="None" revocationMode="NoCheck" trustedStoreLocation="LocalMachine" /&gt;
+										&lt;/serviceCertificate&gt;
+									&lt;/clientCredentials&gt;
+									&lt;/behavior&gt;
+								&lt;/endpointBehaviors&gt;
+								&lt;/behaviors&gt;
+							&lt;/system.serviceModel&gt;
+						</code></pre>
+					</section>
+			</section>
+			<section>
+				<h2>Everything needed should be set up by Octopus even in prod</h2>
+				<p>IIS set up must be complete after deploy</p>
+				<p>Scheduled tasks must be set up</p>
+				<p>Windows services must be installed</p>
+				<p>Databases needs to be upagraded</p>
+			</section>
+			<section>
+				<section>
+				<h2>How to handle Windows services</h2>
+				<ul>
+					<li>We use Topshelf</li>
+					<li>Pre and PostDeploy files</li>
+				</ul>
+				</section>
+				<section>
+					<h2>Topshelf</h2>
+					<p>Install the Topshelf nuget</p>
+					<pre><code data-trim data-noescape>
+HostFactory.Run(x =>
+{
+	x.Service<MessageListenerService>(s =>
+	{
+		s.ConstructUsing(name => new MessageListenerService());
+		s.WhenStarted(es => es.Start());
+		s.WhenStopped(es => es.Stop());
+	});
+	x.SetDescription("Decides what kind of notification(Push/SMS/Email/Print) with which text to send to customer");
+	x.SetDisplayName("Qliro.NotificationService.MessageListener");
+	x.SetServiceName("Qliro.NotificationService.MessageListener");
+}
+					</code></pre>
+				</section>
+				<section>
+					<h2>Predeploy.ps1</h2>
+					<pre><code data-trim data-noescape>
+							Write-Host "Executing predeploy in: "
+							Write-Host $(get-location)
+							if (Test-Path "Qliro.NotificationService.MessageListener.exe")
+							{
+								Write-Host "Qliro.NotificationService.MessageListener.exe"
+								.\Qliro.NotificationService.MessageListener.exe stop 
+								
+								Write-Host "Uninstalling Qliro.NotificationService.LifeSaver.MessageListner.exe"
+								.\Qliro.NotificationService.MessageListener.exe uninstall
+								
+								if ($LastExitCode -eq 4)
+								{
+									Write-Host "The service was not installed. Predeploy will report that as exit code 0 which means OK."
+									exit 0
+								}
+							}	
+					</code></pre>
+						
+				</section>
+				<section>
+						<h2>PostDeploy.ps1</h2>
+						<pre><code data-trim data-noescape>
+								Write-Host "Executing postdeploy in: "
+								Write-Host $(get-location)
+								
+								Write-Host $OctopusParameters["Iis_ApplicationPoolUserName"]
+								.\Qliro.NotificationService.MessageListener.exe install --autostart -username $OctopusParameters["ApplicationUserName"] -password $OctopusParameters["ApplicationPassword"] | Write-Host
+								.\Qliro.NotificationService.MessageListener.exe start | Write-Host
+						</code></pre>
+							
+				</section>
+				
+			</section>
+			<section>
+					<h2>Database Upgrades</h2>
+					<ul>
+						<ul>DBAs create the database before first release</ul>
+						<li>Use Entityframework with code migrations</li>
+						<li>Or tools like DbUp would work fine to</li>
+						<li>Include a project to upgrade the database</li>
+						<li>Execute the upgrade system as a part of deployment</li>
+					</ul>
+			</section>
+			<section>
+				<h2>Monitoring- Health endpoints</h2>
+				<p>Don't do manual checking for vital daily/hourly system checks</p>
+				<p>Expose Health endpoint that can disaply status of system</p>
+				<ul>
+					<li>Inlcude things as Database state checks</li>
+					<li>Error queues</li>
+					<li>Kibana searches</li>
+				</ul>
+			</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				width: '80%',
+    			height: '80%',
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
